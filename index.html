@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>記憶重構 - 台灣在地密室逃脫</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: #121212; color: #e0e0e0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        #game-container { width: 100%; max-width: 480px; height: 100vh; max-height: 850px; background: #1e1e1e; display: flex; flex-direction: column; border-radius: 0; box-shadow: 0 0 20px rgba(0,0,0,0.8); position: relative; overflow: hidden; }
+        @media (min-width: 481px) { #game-container { border-radius: 16px; height: 90vh; } }
+        header { background: #2c2c2c; padding: 15px; text-align: center; border-bottom: 1px solid #3d3d3d; position: relative; }
+        header h1 { font-size: 1.1rem; color: #ffb74d; letter-spacing: 1px; }
+        .stage-indicator { font-size: 0.8rem; color: #aaa; margin-top: 4px; }
+        .content-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; justify-content: space-between; }
+        .story-box { background: #252525; padding: 15px; border-radius: 8px; border-left: 4px solid #ffb74d; margin-bottom: 15px; font-size: 0.95rem; line-height: 1.6; color: #f5f5f5; }
+        .puzzle-box { background: #2a2a2a; padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: center; }
+        .puzzle-box p { font-size: 0.9rem; margin-bottom: 10px; color: #ccc; }
+        input[type="text"], input[type="password"] { width: 100%; padding: 12px; font-size: 1.1rem; text-align: center; background: #181818; border: 1px solid #444; border-radius: 6px; color: #fff; margin-bottom: 10px; letter-spacing: 2px; }
+        button { width: 100%; padding: 12px; background: #d97706; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        button:active { background: #b45309; }
+        .footer-nav { display: flex; gap: 10px; padding: 15px; background: #252525; border-top: 1px solid #333; }
+        .footer-nav button { background: #374151; font-size: 0.9rem; }
+        .footer-nav button.primary { background: #d97706; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; padding: 20px; z-index: 100; display: none; }
+        .modal-content { background: #222; padding: 25px; border-radius: 12px; max-width: 400px; width: 100%; text-align: center; border: 1px solid #444; }
+        .modal-content h2 { margin-bottom: 15px; color: #ffb74d; font-size: 1.3rem; }
+        .modal-content p { font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px; color: #ddd; text-align: left; }
+        .remote-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .remote-btn { padding: 15px; background: #333; color: #fff; border: 1px solid #555; border-radius: 6px; font-size: 0.9rem; }
+        .remote-btn.home-target { background: #c2410c; border-color: #f97316; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <header>
+        <h1 id="game-title">記憶重構</h1>
+        <div class="stage-indicator" id="stage-indicator">第一關：臥室（槍傷驚醒）</div>
+    </header>
+
+    <div class="content-area" id="content-area"></div>
+
+    <div class="footer-nav">
+        <button onclick="showHint()">💡 線索提示</button>
+        <button class="primary" onclick="restartGame()">🔄 重新開始</button>
+    </div>
+</div>
+
+<div class="modal" id="hint-modal">
+    <div class="modal-content">
+        <h2>💡 線索提示</h2>
+        <p id="hint-text">提示內容...</p>
+        <button onclick="closeModal()">知道了</button>
+    </div>
+</div>
+
+<script>
+    let currentStage = 1;
+
+    const stages = {
+        1: {
+            title: "第一關：臥室（槍傷驚醒）",
+            story: "頭痛欲裂，枕頭邊還留著一把帶血的黑色手槍。你依稀想起五年前加入順天會火堂的那天，你把入會日期刻在槍身。桌上便利貼寫著：『吃藥，別忘記密碼。』",
+            puzzleTitle: "請輸入手槍刻上的入會日期 (4位數)",
+            type: "input",
+            answer: "0518",
+            hint: "提示：年份的前綴不用，是 5 年前（2021年）的 5 月 18 日 -> 0518。",
+            next: 2
+        },
+        2: {
+            title: "第二關：廁所（水霧鏡面）",
+            story: "你踉蹌走到浴室洗臉，熱水蒸氣散開，鏡子上浮現一組被水霧蓋住的數字。角落放著藥盒，背面寫著：『重度腦傷可能導致強烈幻覺與虛構人格。』",
+            puzzleTitle: "請輸入鏡子水霧顯影的 4 位數密碼",
+            type: "input",
+            answer: "4829",
+            hint: "提示：鏡子水霧散開後顯現出的洗手台暗格密碼是 4829。",
+            next: 3
+        },
+        3: {
+            title: "第三關：廚房（胃痛與雞湯食譜）",
+            story: "空腹與劇烈頭痛讓胃部翻攪。牆上貼著『剝皮辣椒雞湯完整食譜』：半隻仿土雞 $380、剝皮辣椒 $120、香菇 $85、米酒 $65、老薑 $35、青蔥 $40、蛤蜊 $40。把所有金額加起來才能解開冰箱拿胃藥！",
+            puzzleTitle: "請輸入剝皮辣椒雞湯的所有食材總金額",
+            type: "input",
+            answer: "765",
+            hint: "提示：將 380 + 120 + 85 + 65 + 35 + 40 + 40 全部加總起來（答案為 765）。",
+            next: 4
+        },
+        4: {
+            title: "第四關：客廳（交往紀念日與鏡中字）",
+            story: "客廳全身鏡上貼著一張詭異字條：『這裡根本沒有別人，一切都是你自己想出來的。』你甩開幻覺，輸入兩人在墾丁海邊確定交往的日子。",
+            puzzleTitle: "請輸入交往紀念日 (4位數 MMDD)",
+            type: "input",
+            answer: "1024",
+            hint: "提示：墾丁海邊吹風的那天是 10 月 24 日。",
+            next: 5
+        },
+        5: {
+            title: "第五關：更衣室（聖誕毛衣）",
+            story: "衣櫃裡掛著帥氣皮夾克與東翰親手織給你的粗針織毛衣。那是他在你生日過後的冬天，當作節日送你的禮物。",
+            puzzleTitle: "請輸入送毛衣的聖誕節日 (4位數 MMDD)",
+            type: "input",
+            answer: "1225",
+            hint: "提示：普天同慶的溫馨節日，12月25日。",
+            next: 6
+        },
+        6: {
+            title: "第六關：臥室床頭（媽祖生日與病危通知）",
+            story: "倒扣相框旁是大甲鎮瀾宮的平安符，下方壓著一張神經內科病危通知單。你想起東翰是在媽祖聖誕當天特地去幫你求平安的。",
+            puzzleTitle: "請輸入農曆媽祖聖誕日 (4位數 MMDD)",
+            type: "input",
+            answer: "0323",
+            hint: "提示：農曆三月二十三日，填入 0323。",
+            next: 7
+        },
+        7: {
+            title: "第七關：書房（幫派帳本與保險箱）",
+            story: "書房桌上放著一本帳本，黑龍會徽章（代號 HL-08）與匯款日期（0713）指向底層保險箱。裡面全是東翰簽名的資產轉移單與東南亞單程機票...",
+            puzzleTitle: "請輸入書房保險箱的誤導/暗號密碼 (6位數)",
+            type: "input",
+            answer: "080713",
+            hint: "提示：結合黑龍會代碼與匯款日期的 080713（輸入此組或幫派暗號 791300 將導向黑道叛變疑雲）。",
+            next: 8
+        },
+        8: {
+            title: "第八關：客廳電視（橘色貼紙謎語）",
+            story: "智慧電視遙控器被貼滿標籤。橘色貼紙旁寫著詩意謎語：『敬偉，你總說黑色太冷...但你記得嗎？你第一次把我緊緊抱在懷裡的那天，陽光把天空染成了最溫暖的顏色。找到遙控器上那個顏色的標籤，那是我留給你的回家符號。』",
+            puzzleTitle: "請點擊遙控器上貼著橘色貼紙的正確按鈕",
+            type: "remote",
+            next: 9
+        },
+        9: {
+            title: "第九關：玄關（告白日與機票）",
+            story: "走到玄關，鞋櫃角落藏著一張單程機票。你腦海中浮現當年在巷口鹽酥雞攤，東翰滿嘴食物向你告白的靦腆模樣。",
+            puzzleTitle: "請輸入兩人告白的日子 (4位數 MMDD)",
+            type: "input",
+            answer: "0807",
+            hint: "提示：巷口鹽酥雞攤飄香的 8 月 7 日。",
+            next: 10
+        },
+        10: {
+            title: "第十關：大門口（終極命運抉擇）",
+            story: "終於走到大門前。電子鎖需要輸入最後的終極密碼。是要輸入兩人生日完整年月日加總迎來真相？還是輸入懷疑的密碼？",
+            puzzleTitle: "請輸入終極密碼（好結局請輸入兩人生日總和 4034，或輸入壞結局代碼 791300 / 081299）",
+            type: "input",
+            answer: "4034",
+            hint: "提示：好結局密碼為兩人生日年月日全部數字相加 (2003+2+15+2000+4+10 = 4034)。",
+            next: "end"
+        }
+    };
+
+    function renderStage() {
+        const stage = stages[currentStage];
+        document.getElementById("game-title").innerText = "記憶重構";
+        document.getElementById("stage-indicator").innerText = stage.title;
+
+        let html = `<div class="story-box">${stage.story}</div>`;
+
+        if (stage.type === "input") {
+            html += `
+                <div class="puzzle-box">
+                    <p>${stage.puzzleTitle}</p>
+                    <input type="password" id="user-input" placeholder="請輸入密碼..." autocomplete="off">
+                    <button onclick="checkInput()">確認解鎖</button>
+                </div>
+            `;
+        } else if (stage.type === "remote") {
+            html += `
+                <div class="puzzle-box">
+                    <p>${stage.puzzleTitle}</p>
+                    <div class="remote-grid">
+                        <button class="remote-btn" onclick="wrongRemote()">電源</button>
+                        <button class="remote-btn" onclick="wrongRemote()">選單</button>
+                        <button class="remote-btn home-target" onclick="correctRemote()">🏠 HOME (橘)</button>
+                        <button class="remote-btn" onclick="wrongRemote()">音量+</button>
+                        <button class="remote-btn" onclick="wrongRemote()">頻道+</button>
+                        <button class="remote-btn" onclick="wrongRemote()">返回</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        document.getElementById("content-area").innerHTML = html;
+    }
+
+    function checkInput() {
+        const val = document.getElementById("user-input").value.trim();
+        const stage = stages[currentStage];
+
+        if (currentStage === 10) {
+            if (val === "4034") {
+                showEnding("good");
+            } else if (val === "791300" || val === "080713") {
+                showEnding("bad1");
+            } else if (val === "081299") {
+                showEnding("bad2");
+            } else {
+                alert("密碼錯誤！請重新回想線索或點擊提示。");
+            }
+            return;
+        }
+
+        if (val === stage.answer || (currentStage === 7 && val === "791300")) {
+            alert(currentStage === 7 && val === "791300" ? "你選擇了黑道戒備與懷疑的深淵..." : "解密成功！");
+            currentStage = stage.next;
+            renderStage();
+        } else {
+            alert("密碼不正確，再仔細想想或查看提示！");
+        }
+    }
+
+    function correctRemote() {
+        alert("電視亮起，東翰留下的溫柔影片緩緩播放... 通關！");
+        currentStage = 9;
+        renderStage();
+    }
+
+    function wrongRemote() {
+        alert("按鍵毫無反應，再看看橘色貼紙的謎語提示！");
+    }
+
+    function showEnding(type) {
+        let title = "";
+        let text = "";
+        if (type === "good") {
+            title = "💚 好結局：留一盞燈給你";
+            text = "大門緩緩打開，外面是安靜的走廊。東翰提著熱粥與胃藥站在門口，笑著對他說：『你重新經歷過我們的生活了對不對？就算全部忘記也沒關係，我們可以再體驗一次……我都在。』";
+        } else if (type === "bad1") {
+            title = "🖤 壞結局一：撕開的溫柔";
+            text = "大門打開後空無一人，鞋櫃上留著一封信與機票。信上揭露了幫派奪權與臥底的殘酷真相，溫柔的陪伴全成了精心計算的佈局。";
+        } else if (type === "bad2") {
+            title = "💔 壞結局二：荒蕪的夢";
+            text = "大門打開後是一片漆黑廢墟與殘破毛胚屋，回頭看所謂的溫馨家園其實全不存在。一切只是重度腦傷與失智下的孤獨幻想。";
+        }
+
+        document.getElementById("content-area").innerHTML = `
+            <div class="story-box" style="border-left-color: #ef4444;">
+                <h2>${title}</h2>
+                <p style="margin-top: 10px; line-height: 1.8;">${text}</p>
+            </div>
+            <button onclick="restartGame()" style="margin-top: 20px; background: #2563eb;">重新體驗遊戲</button>
+        `;
+        document.getElementById("stage-indicator").innerText = "遊戲劇終";
+    }
+
+    function showHint() {
+        const stage = stages[currentStage];
+        document.getElementById("hint-text").innerText = stage.hint || "本關請根據畫面上的文字與物品線索進行推導。";
+        document.getElementById("hint-modal").style.display = "flex";
+    }
+
+    function closeModal() {
+        document.getElementById("hint-modal").style.display = "none";
+    }
+
+    function restartGame() {
+        currentStage = 1;
+        renderStage();
+    }
+
+    renderStage();
+</script>
+
+</body>
+</html>
