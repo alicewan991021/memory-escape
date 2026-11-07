@@ -3,42 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>記憶重構 - 台灣在地密室逃脫</title>
+    <title>記憶重構 - 沉浸式視覺搜查版</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { background-color: #0d0d0d; color: #e0e0e0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
-        #game-container { width: 100%; max-width: 480px; height: 100vh; max-height: 880px; background: #181818; display: flex; flex-direction: column; position: relative; overflow: hidden; }
-        @media (min-width: 481px) { #game-container { border-radius: 16px; height: 92vh; border: 1px solid #333; box-shadow: 0 0 30px rgba(0,0,0,0.9); } }
+        body { background-color: #080808; color: #e5e5e5; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        #game-container { width: 100%; max-width: 480px; height: 100vh; max-height: 880px; background: #121212; display: flex; flex-direction: column; position: relative; overflow: hidden; border: 1px solid #222; }
+        @media (min-width: 481px) { #game-container { border-radius: 16px; height: 92vh; box-shadow: 0 0 30px rgba(0,0,0,0.9); } }
         
-        header { background: #222; padding: 12px 15px; text-align: center; border-bottom: 2px solid #dc2626; }
-        header h1 { font-size: 1.1rem; color: #ef4444; letter-spacing: 2px; }
+        header { background: #1a1a1a; padding: 12px 15px; text-align: center; border-bottom: 2px solid #b91c1c; }
+        header h1 { font-size: 1.1rem; color: #f87171; letter-spacing: 2px; }
         .stage-indicator { font-size: 0.8rem; color: #9ca3af; margin-top: 3px; }
         
         .content-area { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
         
-        .search-area-title { font-size: 0.85rem; color: #f59e0b; font-weight: bold; margin-bottom: 5px; text-align: center; }
-        .search-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .search-btn { background: #262626; border: 1px solid #444; color: #38bdf8; padding: 12px 8px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: all 0.2s; }
-        .search-btn:active { background: #0284c7; color: #fff; transform: scale(0.98); }
+        /* 擬真房間視覺卡片 */
+        .room-view { width: 100%; height: 150px; background: #1a1a1a; border-radius: 10px; border: 1px dashed #444; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 15px; position: relative; }
+        .room-view h3 { color: #fbbf24; font-size: 0.95rem; margin-bottom: 5px; }
+        .room-view p { color: #9ca3af; font-size: 0.8rem; line-height: 1.4; }
+
+        .search-area-title { font-size: 0.85rem; color: #38bdf8; font-weight: bold; margin-top: 5px; text-align: center; }
+        .search-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        .search-btn { background: #1f1f1f; border: 1px solid #333; color: #f3f4f6; padding: 12px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
+        .search-btn:active { background: #b91c1c; transform: scale(0.98); }
         
-        .story-box { background: #222; padding: 12px 15px; border-radius: 8px; border-left: 4px solid #dc2626; font-size: 0.9rem; line-height: 1.5; color: #e5e5e5; }
+        .story-box { background: #1a1a1a; padding: 12px 15px; border-radius: 8px; border-left: 4px solid #b91c1c; font-size: 0.9rem; line-height: 1.6; color: #f3f4f6; }
         
-        .puzzle-box { background: #222; padding: 12px 15px; border-radius: 8px; text-align: center; border: 1px solid #3b3b3b; }
-        .puzzle-box p { font-size: 0.85rem; margin-bottom: 10px; color: #f59e0b; font-weight: 500; }
+        .puzzle-box { background: #1a1a1a; padding: 12px 15px; border-radius: 8px; text-align: center; border: 1px solid #333; }
+        .puzzle-box p { font-size: 0.85rem; margin-bottom: 10px; color: #fbbf24; font-weight: 500; }
         
-        input[type="password"], input[type="text"] { width: 100%; padding: 12px; font-size: 1.2rem; text-align: center; background: #121212; border: 1px solid #4b5563; border-radius: 6px; color: #34d399; letter-spacing: 4px; font-family: monospace; margin-bottom: 10px; }
-        button.submit-btn { width: 100%; padding: 12px; background: #dc2626; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; }
+        input[type="password"], input[type="text"] { width: 100%; padding: 12px; font-size: 1.2rem; text-align: center; background: #0b0b0b; border: 1px solid #4b5563; border-radius: 6px; color: #34d399; letter-spacing: 4px; font-family: monospace; margin-bottom: 10px; }
+        button.submit-btn { width: 100%; padding: 12px; background: #b91c1c; color: white; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; }
         button.submit-btn:active { background: #991b1b; }
         
-        .footer-nav { display: flex; gap: 10px; padding: 12px 15px; background: #222; border-top: 1px solid #333; }
+        .footer-nav { display: flex; gap: 10px; padding: 12px 15px; background: #1a1a1a; border-top: 1px solid #333; }
         .footer-nav button { flex: 1; padding: 10px; background: #374151; color: white; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: bold; }
-        .footer-nav button.primary { background: #dc2626; }
+        .footer-nav button.primary { background: #b91c1c; }
         
+        /* 翻找特寫彈窗 (模擬拿在手上檢視) */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; padding: 20px; z-index: 100; display: none; }
         .modal-content { background: #1f2937; padding: 20px; border-radius: 12px; max-width: 400px; width: 100%; text-align: center; border: 1px solid #4b5563; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        .modal-content h3 { color: #f59e0b; margin-bottom: 12px; font-size: 1.1rem; }
-        .modal-content p { font-size: 0.9rem; line-height: 1.6; color: #d1d5db; text-align: left; margin-bottom: 15px; }
-        .modal-content button { padding: 10px 20px; background: #f59e0b; border: none; border-radius: 6px; color: #000; font-weight: bold; width: 100%; }
+        .modal-content h3 { color: #fbbf24; margin-bottom: 12px; font-size: 1.1rem; }
+        .modal-content p { font-size: 0.9rem; line-height: 1.6; color: #d1d5db; text-align: left; margin-bottom: 15px; background: #111827; padding: 12px; border-radius: 6px; border: 1px dashed #374151; }
+        .modal-content button { padding: 10px 20px; background: #fbbf24; border: none; border-radius: 6px; color: #000; font-weight: bold; width: 100%; }
 
         .remote-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
         .remote-btn { padding: 12px 5px; background: #374151; color: #fff; border: 1px solid #4b5563; border-radius: 6px; font-size: 0.8rem; }
@@ -63,7 +69,7 @@
 
 <div class="modal" id="game-modal">
     <div class="modal-content">
-        <h3 id="modal-title">翻找發現</h3>
+        <h3 id="modal-title">證物檢視</h3>
         <p id="modal-text">細節內容...</p>
         <button onclick="closeModal()">放回原處</button>
     </div>
@@ -75,132 +81,140 @@
     const stages = {
         1: {
             title: "第一關：臥室（槍傷驚醒）",
-            story: "頭痛欲裂地醒來，身上散發著血腥味。你必須在房間裡東翻西找，找出自己的真實身分與解鎖密碼。",
+            roomDesc: "【臥室現場】<br>空氣中瀰漫著血腥與硝煙味。枕頭邊散落著黑槍與泛黃便利貼。",
+            story: "你猛然驚醒，頭痛欲裂。必須在凌亂的臥室裡翻找當初加入幫派的證據。",
             searchButtons: [
-                { title: "🔍 翻看枕頭下", text: "【帶血黑色手槍】：槍身側面刻著文字：『順天會火堂 2021.05.18 入會』。" },
-                { title: "🔍 翻動床頭櫃抽屜", text: "【便利貼】：『敬偉，記得按時吃藥。別忘記你最初加入幫派的那一天。』" },
-                { title: "🔍 檢查衣櫃暗格", text: "【舊相片】：裡面是一張林敬偉的幫派刺青照片，生日寫著：2003.02.15。" }
+                { title: "🔍 拿起枕頭邊的黑色手槍檢視", text: "你將沈重的黑槍拿在手中翻轉。在槍身近扳機的陰影處，用刀尖刻著微小的數字：『2021.05.18』。" },
+                { title: "🔍 翻開床頭櫃壓著的便利貼", text: "便利貼上寫著：『敬偉，記得按時吃藥。別忘記你最初宣誓那天。』字跡是東翰的。" }
             ],
-            puzzleTitle: "請輸入手槍刻上的入會月日 (4位數 MMDD)",
+            puzzleTitle: "請輸入手槍刻上的入會日期 (4位數 MMDD)",
             type: "input",
             answer: "0518",
-            hint: "翻看枕頭下的手槍，上面刻有入會日期 05 月 18 日 (0518)。",
+            hint: "拿起枕頭邊的黑槍，仔細檢查槍身上的金屬刻痕。",
             next: 2
         },
         2: {
-            title: "第二關：浴室（水霧與藥盒）",
-            story: "熱水蒸氣瀰漫浴室，你覺得頭暈目眩，開始懷疑自己的大腦是否有問題...",
+            title: "第二關：浴室（水霧與藥袋）",
+            roomDesc: "【浴室現場】<br>熱氣蒸騰，鏡面佈滿水霧，洗手台旁散落著藥袋與空瓶。",
+            story: "你踉蹌走到浴室洗臉。鏡子與藥袋似乎隱藏著讓你不安的真相。",
             searchButtons: [
-                { title: "🔍 擦拭鏡面水霧", text: "【鏡子】：水霧散開，顯現出紅筆寫下的密碼：『4829』。" },
-                { title: "🔍 翻開洗手台藥袋", text: "【精神科處方箋】：『病歷號 ICU-081299。警告：患者具嚴重創傷後妄想與人格分裂。』<br>⚠️ 誤導伏筆：這組病歷號 081299 似乎暗藏某種結局..." },
-                { title: "🔍 翻找垃圾桶", text: "【空藥瓶】：強效鎮定劑與神經修復藥物。" }
+                { title: "🔍 用手抹開鏡面水霧", text: "隨著水氣散開，鏡面上浮現一組用紅筆寫下的數字：『4829』。" },
+                { title: "🔍 翻看洗手台下的精神科藥袋", text: "你倒出藥袋裡的處方箋：『病患林敬偉，重度腦傷伴隨解離性妄想。病歷號：081299。』<br><br>*(角落一行小字寫著：若分不清現實，請輸入此病歷號)*" }
             ],
-            puzzleTitle: "請輸入鏡中顯示的 4 位數密碼",
+            puzzleTitle: "請輸入鏡中水霧顯影的 4 位數密碼",
             type: "input",
             answer: "4829",
-            hint: "擦拭鏡面可看到 4829。藥袋上的 081299 則是一組危險的病歷號密碼！",
+            hint: "動手抹開鏡面水霧就能看到密碼。藥袋上的數字則是通往幻覺結局的陷阱。",
             next: 3
         },
         3: {
             title: "第三關：廚房（胃痛與雞湯）",
-            story: "胃部劇烈翻騰，你必須打開貼著備料單的密碼冰箱拿藥。",
+            roomDesc: "【廚房現場】<br>冰箱被電子密碼鎖鎖住，流理台貼著一張剝皮辣椒雞湯的食譜。",
+            story: "胃部劇烈翻攪，必須算出食譜上的總金額才能打開冰箱拿胃藥。",
             searchButtons: [
-                { title: "🔍 翻閱牆上食譜", text: "【剝皮辣椒雞湯】：仿土雞$380、剝皮辣椒$120、香菇$85、米酒$65、老薑$35、青蔥$40、蛤蜊$40。" },
-                { title: "🔍 檢查廚房抽屜", text: "【圍裙】：口袋裡有一張發票，上面寫著『謝謝你總是煮雞湯給我喝 — 東翰』。" }
+                { title: "🔍 拿近檢視牆上的食譜明細", text: "【食材清單】：半隻仿土雞 $380、剝皮辣椒罐 $120、香菇 $85、米酒 $65、老薑 $35、青蔥 $40、蛤蜊 $40。" },
+                { title: "🔍 翻看冰箱門上的合照磁鐵", text: "照片中東翰笑著餵你喝湯。背後寫著：『胃痛就要乖乖喝湯。』" }
             ],
-            puzzleTitle: "請計算並輸入食材總金額 (加總開鎖)",
+            puzzleTitle: "請計算並輸入剝皮辣椒雞湯的所有食材總金額",
             type: "input",
             answer: "765",
-            hint: "將食譜上的食材金額加總：380+120+85+65+35+40+40 = 765。",
+            hint: "將食譜上的金額全部加總：380+120+85+65+35+40+40 = 765。",
             next: 4
         },
         4: {
-            title: "第四關：客廳（交往紀念）",
-            story: "客廳冷清寂靜，全身鏡上貼著詭異的警告...",
+            title: "第四關：客廳（交往紀念與警告）",
+            roomDesc: "【客廳現場】<br>全身鏡被貼上黑布與詭異字條，茶几上放著墾丁合照。",
+            story: "客廳安靜得令人發毛，鏡上的字條動搖著你的信任。",
             searchButtons: [
-                { title: "🔍 翻看桌上相框", text: "【墾丁海邊合照】：背後寫著『2022.10.24 確定關係的第一天，陽光真好。』" },
-                { title: "🔍 撕下鏡上黑紙", text: "【警告字條】：『這裡根本沒有別人，一切都是你自己想出來的。』" }
+                { title: "🔍 翻看茶几上的相框背面", text: "墾丁海邊合照背後寫著：『2022.10.24 確定交往的第一天。』" },
+                { title: "🔍 撕開全身鏡上的黑布字條", text: "字條寫著：『這裡根本沒有別人，東翰早就離開了，一切都是你想出來的。』" }
             ],
-            puzzleTitle: "請輸入確定交往的日子 (4位數 MMDD)",
+            puzzleTitle: "請輸入墾丁交往紀念日 (4位數 MMDD)",
             type: "input",
             answer: "1024",
-            hint: "墾丁合照背後的日期是 10 月 24 日 (1024)。",
+            hint: "檢查墾丁合照相框的背面。",
             next: 5
         },
         5: {
-            title: "第五關：更衣室（溫暖毛衣）",
-            story: "打開衣櫃，有一件親手織的針織毛衣...",
+            title: "第五關：更衣室（毛衣與證件）",
+            roomDesc: "【更衣室現場】<br>衣櫃裡掛著針織毛衣，皮夾克口袋裡露出證件一角。",
+            story: "在衣櫃與外套中翻找，逐漸拼湊出東翰的身分。",
             searchButtons: [
-                { title: "🔍 翻看毛衣口袋", text: "【手寫吊牌】：『送給敬偉的聖誕禮物。12.25 天冷要穿暖。』" },
-                { title: "🔍 搜查皮夾克內袋", text: "【身分證】：李東翰，生日 2000.04.10。" }
+                { title: "🔍 翻看毛衣口袋的手寫吊牌", text: "吊牌寫著：『送給敬偉的聖誕禮物。天冷要穿暖。 12.25』" },
+                { title: "🔍 抽出一旁皮夾裡的身分證", text: "證件上是李東翰的照片，出生年月日為：『2000 年 04 月 10 日』。<br><br>*(這組生日將是解開真相的關鍵拼圖)*" }
             ],
             puzzleTitle: "請輸入送毛衣的聖誕節日 (4位數 MMDD)",
             type: "input",
             answer: "1225",
-            hint: "聖誕禮物吊牌日期為 12 月 25 日 (1225)。另外上記下李東翰的生日！",
+            hint: "查看毛衣口袋裡的吊牌日期。",
             next: 6
         },
         6: {
-            title: "第六關：床頭（媽祖與病歷）",
-            story: "床頭櫃上擺著平安符與一張令人生疑的文件...",
+            title: "第六關：臥室床頭（平安符與病歷）",
+            roomDesc: "【床頭櫃現場】<br>大甲媽祖平安符下壓著一份神經內科的重症通知單。",
+            story: "床頭的物件透露出信仰與殘酷的病理現實。",
             searchButtons: [
-                { title: "🔍 翻開平安符", text: "【大甲鎮瀾宮符水】：『媽祖聖誕求得（農曆三月二十三日）。』" },
-                { title: "🔍 抽出一旁的病歷", text: "【重症通知】：『患者林敬偉，腦部受創，加護病房編號 081299。』" }
+                { title: "🔍 打開平安符紅包袋", text: "符袋內紙條寫著：『大甲鎮瀾宮媽祖聖誕（農曆三月二十三日）求得。』" },
+                { title: "🔍 抽開下方的重症病歷紙", text: "病歷上寫著：『加護病房編號 ICU-08，病歷號末碼 1299。』" }
             ],
             puzzleTitle: "請輸入農曆媽祖聖誕日 (4位數 MMDD)",
             type: "input",
             answer: "0323",
-            hint: "農曆三月二十三日 ➔ 輸入 0323。",
+            hint: "查看平安符紅包袋內的農曆日期。",
             next: 7
         },
         7: {
-            title: "第七關：書房（幫派叛變疑雲）",
-            story: "書房裡散落著黑道帳本與秘密保險箱，氣氛極度不尋常！",
+            title: "第七關：書房（幫派帳本與保險箱）",
+            roomDesc: "【書房現場】<br>桌上散落著黑道帳本與保險箱，空氣中充滿背叛的氣息。",
+            story: "翻開書房的帳本，一場組織內部的陰謀逐漸浮現。",
             searchButtons: [
-                { title: "🔍 翻閱幫派秘密帳本", text: "【帳本紀錄】：『黑龍會徽章代號 HL-08，秘密匯款日期 0713。』<br>⚠️ 誤導伏筆：這暗示著叛變暗號 080713 或黑道代碼 791300！" },
-                { title: "🔍 檢查保險箱夾層", text: "【資產轉移單】：上面赫然簽著東翰的名字，還有兩張前往東南亞的單程機票..." }
+                { title: "🔍 翻開黑龍會機密帳本", text: "帳本記載：『代號 HL-08，秘密匯款日期 0713。』<br>旁邊有一張便條寫著：『保險箱密碼可結合代碼與匯款日（080713）或幫派暗號（791300）。』" },
+                { title: "🔍 檢查保險箱底層夾層", text: "裡面躺著兩張單程機票與資產轉移單，簽名全都是東翰的名字。" }
             ],
-            puzzleTitle: "請輸入保險箱密碼 (6位數)",
+            puzzleTitle: "請輸入書房保險箱的暗號密碼 (6位數)",
             type: "input",
             answer: "080713",
-            hint: "輸入帳本密碼 080713 開啟保險箱（此處會深深懷疑東翰叛變）。",
+            hint: "參考帳本上的黑道代碼與匯款日期組合成 080713（或輸入 791300）。",
             next: 8
         },
         8: {
-            title: "第八關：電視（遙控器謎語）",
-            story: "電視遙控器貼滿彩色貼紙，旁邊留著東翰的溫柔留言...",
+            title: "第八關：客廳電視（遙控器謎語）",
+            roomDesc: "【客廳電視櫃】<br>智慧電視遙控器貼滿了繽紛的標籤貼紙。",
+            story: "電視螢幕呈現黑畫面，必須找到東翰留下的回家標記。",
             searchButtons: [
-                { title: "🔍 閱讀遙控器貼紙", text: "『敬偉，你總說黑色太冷...第一次把你抱在懷裡那天，陽光把天空染成最溫暖的顏色。那個顏色的 HOME 標籤是我留給你的回家符號。』" }
+                { title: "🔍 拿起遙控器閱讀旁邊的字條", text: "字條寫著：『敬偉，你總說黑色太冷...第一次把你緊緊抱在懷裡那天，陽光把天空染成了最溫暖的顏色。找到遙控器上那個顏色的標籤，那是我留給你的回家符號。』" }
             ],
-            puzzleTitle: "請點擊遙控器上貼著橘色貼紙的按鈕",
+            puzzleTitle: "請點擊遙控器上貼著橘色貼紙的正確按鈕",
             type: "remote",
             next: 9
         },
         9: {
-            title: "第九關：玄關（鹽酥雞告白）",
-            story: "走到大門附近的鞋櫃，記憶碎片開始重組...",
+            title: "第九關：玄關（告白回憶與機票真相）",
+            roomDesc: "【玄關鞋櫃】<br>鞋櫃角落放著舊相簿與準備出國的機票。",
+            story: "站在玄關，記憶中的溫暖與眼前的現實交織。",
             searchButtons: [
-                { title: "🔍 翻開舊相簿", text: "【鹽酥雞攤照片】：『2023.08.07 東翰滿嘴食物向我告白成功！』" },
-                { title: "🔍 查看單程機票", text: "【機票】：台北飛曼谷，乘客：李東翰、林敬偉（兩張票！原來他要帶你離開幫派！）" }
+                { title: "🔍 翻開舊相簿的鹽酥雞照片", text: "照片背後寫著：『2023.08.07 東翰滿嘴胡椒粉向我告白，笑得像個笨蛋。』" },
+                { title: "🔍 拿起鞋櫃角落的機票確認", text: "仔細一看機票，上面寫著兩人的名字。原來東翰不是要背叛，而是安排好一切準備帶你離開黑幫！" }
             ],
-            puzzleTitle: "請輸入告白日 (4位數 MMDD)",
+            puzzleTitle: "請輸入兩人告白的日期 (4位數 MMDD)",
             type: "input",
             answer: "0807",
-            hint: "鹽酥雞攤告白日為 8 月 7 日 ➔ 0807。",
+            hint: "查看鹽酥雞攤舊照片背後的告白日期。",
             next: 10
         },
         10: {
             title: "第十關：大門口（終極命運抉擇）",
-            story: "站在大門電子鎖前，所有翻找出來的線索在腦中交織。你究竟要相信愛情、相信幫派背叛，還是相信自己只是個精神病患？",
+            roomDesc: "【大門口電子鎖】<br>電子鎖閃爍著紅光。你一路搜查到的真相、背叛與幻覺，在此匯聚。",
+            story: "大門前，你的每一次翻找與抉擇，將導向截然不同的結局。",
             searchButtons: [
-                { title: "🔍 彙整【真相線索】", text: "【兩人生日總加】<br>林敬偉 (2003.02.15) ➔ 2003 + 2 + 15 = 2020<br>李東翰 (2000.04.10) ➔ 2000 + 4 + 10 = 2014<br>總和：2020 + 2014 = 💚 4034 (信任與真相)" },
-                { title: "🔍 彙整【黑道叛變線索】", text: "黑龍會暗號與帳本匯款代碼 🖤 791300 / 080713 (懷疑背叛)" },
-                { title: "🔍 彙整【精神病患線索】", text: "加護病房與精神科病歷號 💔 081299 (幻覺失智)" }
+                { title: "🔍 回憶【真相拼圖】兩人生日加總", text: "林敬偉生日 2003.02.15 (2003+2+15 = 2020)<br>李東翰生日 2000.04.10 (2000+4+10 = 2014)<br>總和：💚 <b>4034</b> (信任與真相)" },
+                { title: "🔍 回憶【黑道叛變線索】帳本匯款", text: "黑道代碼與匯款日 🖤 <b>791300</b> / <b>080713</b> (幫派背叛)" },
+                { title: "🔍 回憶【精神病患線索】加護病房", text: "精神科創傷病歷號 💔 <b>081299</b> (孤獨幻覺)" }
             ],
-            puzzleTitle: "請輸入終極密碼 (輸入 4034、791300 或 081299)",
+            puzzleTitle: "請輸入終極密碼（好結局 4034，或壞結局 791300 / 081299）",
             type: "input",
             answer: "4034",
-            hint: "好結局密碼：4034。黑道壞結局：791300。病患壞結局：081299。",
+            hint: "好結局輸入兩人生日總和 4034。若被誤導可輸入 791300 或 081299。",
             next: "end"
         }
     };
@@ -212,7 +226,7 @@
 
         let searchBtnsHtml = "";
         if (stage.searchButtons) {
-            searchBtnsHtml = `<div class="search-area-title">👇 點擊下方地點進行現場搜查翻找：</div><div class="search-grid">`;
+            searchBtnsHtml = `<div class="search-area-title">👇 點擊下方物品進行現場翻找：</div><div class="search-grid">`;
             stage.searchButtons.forEach((btn, idx) => {
                 searchBtnsHtml += `<button class="search-btn" onclick="inspectDetail(${idx})">${btn.title}</button>`;
             });
@@ -220,6 +234,10 @@
         }
 
         let html = `
+            <div class="room-view">
+                <h3>${stage.title}</h3>
+                <p>${stage.roomDesc}</p>
+            </div>
             <div class="story-box">${stage.story}</div>
             ${searchBtnsHtml}
         `;
@@ -267,47 +285,47 @@
             if (val === "4034") showEnding("good");
             else if (val === "791300" || val === "080713") showEnding("bad1");
             else if (val === "081299") showEnding("bad2");
-            else alert("密碼錯誤！請再次翻找線索。");
+            else alert("密碼錯誤！請再次翻找房間內的證物。");
             return;
         }
 
         if (val === stage.answer || (currentStage === 7 && (val === "791300" || val === "080713"))) {
             if (currentStage === 7 && (val === "791300" || val === "080713")) {
-                alert("你選擇了懷疑... 保險箱彈開，裡面全是黑道密件。");
+                alert("保險箱彈開，裡面全是黑道密件，讓你對東翰的信任開始動搖...");
             } else {
                 alert("解密成功！");
             }
             currentStage = stage.next;
             renderStage();
         } else {
-            alert("密碼不正確！請點擊上方按鈕翻找更多細節。");
+            alert("密碼不正確！請點擊上方物品按鈕仔細翻找細節。");
         }
     }
 
     function correctRemote() {
-        alert("電視亮起，東翰留下的影片播放... 通關！");
+        alert("電視亮起，東翰留下的溫柔影片播放... 通關！");
         currentStage = 9;
         renderStage();
     }
 
-    function wrongRemote() { alert("按鍵無反應，看看橘色貼紙謎語！"); }
+    function wrongRemote() { alert("按鍵無反應，再看看橘色貼紙的謎語！"); }
 
     function showEnding(type) {
         let title = "", text = "";
         if (type === "good") {
-            title = "💚 真相好結局：留一盞燈給你 (4034)";
-            text = "大門打開，東翰提著熱粥與胃藥站在門口，笑著說：『就算全部忘記也沒關係，我可以陪你再體驗一次……我都在。』原來他冒著生命危險準備機票，只是為了帶你遠離幫派過平淡生活。";
+            title = "💚 好結局：留一盞燈給你 (4034)";
+            text = "大門緩緩打開，外面是安靜的走廊。東翰提著熱粥與胃藥站在門口，笑著對他說：『你重新經歷過我們的生活了對不對？就算全部忘記也沒關係，我們可以再體驗一次……我都在。』";
         } else if (type === "bad1") {
-            title = "🖤 幫派壞結局一：撕開的溫柔 (791300 / 080713)";
-            text = "被黑道疑雲吞噬的你舉槍對準門外。大門打開後空無一人，鞋櫃上的信揭露了幫派奪權與臥底真相，溫柔與陪伴全成了精心計算的局。";
+            title = "🖤 壞結局一：撕開的溫柔 (791300 / 080713)";
+            text = "大門打開後空無一人，鞋櫃上留著一封信與機票。信上揭露了幫派奪權與臥底的殘酷真相，溫柔的陪伴全成了精心計算的佈局。";
         } else if (type === "bad2") {
-            title = "💔 幻覺壞結局二：荒蕪的夢 (081299)";
-            text = "大門打開後是一片漆黑廢墟與殘破毛胚屋。走廊盡頭傳來護士的聲音：『ICU-08 病患又發作了...』原來所謂的溫馨家園與東翰，全是你腦傷後的孤獨幻想。";
+            title = "💔 壞結局二：荒蕪的夢 (081299)";
+            text = "大門打開後是一片漆黑廢墟與殘破毛胚屋，回頭看所謂的溫馨家園其實全不存在。一切只是重度腦傷與失智下的孤獨幻想。";
         }
 
         document.getElementById("content-area").innerHTML = `
-            <div class="story-box" style="border-left-color: #dc2626; padding: 20px;">
-                <h2 style="color:#f59e0b; margin-bottom:10px;">${title}</h2>
+            <div class="story-box" style="border-left-color: #b91c1c; padding: 20px;">
+                <h2 style="color:#fbbf24; margin-bottom:10px;">${title}</h2>
                 <p style="line-height: 1.8;">${text}</p>
             </div>
             <button onclick="restartGame()" class="submit-btn" style="background:#2563eb; margin-top:15px;">重新開始體驗</button>
